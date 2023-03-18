@@ -22,16 +22,80 @@ const squareComplexNumber = (x: ComplexNumber) => {
   return square;
 };
 
-const fc = (z: number, c: number) => {
-  return Math.pow(z, 2) + c;
+const fc = (z: ComplexNumber, c: ComplexNumber) => {
+  return addComplexNumbers(squareComplexNumber(z), c);
 };
 
-const iterate = () => {};
+const getColor = (iterations: number) => {
+  if (iterations > 900) {
+    return "black";
+  }
 
-const draw = (ctx: CanvasRenderingContext2D) => {
-  for (let i = 0; i < totalWidth; i++) {
-    for (let j = 0; j < totalHeight; j++) {
-      ctx.fillRect(i, j, 1, 1);
+  if (iterations > 600) {
+    return "blue";
+  }
+
+  if (iterations > 300) {
+    return "purple";
+  }
+
+  if (iterations > 100) {
+    return "yellow";
+  }
+
+  return "red";
+};
+
+const calculateIterations = () => {
+  const iterations = new Array(1000);
+  for (let i = 0; i < iterations.length; i++) {
+    iterations[i] = new Array(1000);
+  }
+
+  for (let i = 0; i < 1000; i++) {
+    for (let j = 0; j < 1000; j++) {
+      let currentIterations = 0;
+      const z: ComplexNumber = {
+        real: 0,
+        coefficient: 0,
+      };
+      let next = fc(z, {
+        real: i / 1000,
+        coefficient: j / 1000,
+      });
+      while (currentIterations < 1000) {
+        if (Math.pow(next.real * next.coefficient, 2) > 50) {
+          break;
+        }
+
+        next = fc(next, {
+          real: i / 1000,
+          coefficient: j / 1000,
+        });
+
+        currentIterations++;
+      }
+      iterations[i][j] = currentIterations;
+    }
+  }
+
+  return iterations;
+};
+
+const drawPixel = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  iterations: number
+) => {
+  ctx.fillStyle = getColor(iterations);
+  ctx.fillRect(x, y, 1, 1);
+};
+
+const draw = (ctx: CanvasRenderingContext2D, iterations: number[][]) => {
+  for (let i = 0; i < 1000; i++) {
+    for (let j = 0; j < 1000; j++) {
+      drawPixel(ctx, i, j, iterations[i][j]);
     }
   }
 };
@@ -39,21 +103,11 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 document.addEventListener("DOMContentLoaded", () => {
   const app = document.getElementById("app") as HTMLCanvasElement;
 
-  app.height = totalHeight;
-  app.width = totalWidth;
+  app.height = 1000;
+  app.width = 1000;
 
   const ctx = app.getContext("2d");
 
-  draw(ctx);
-
-  ctx.fillStyle = "red";
-  ctx.fillRect(0, 0, 100, 20);
-
-  console.log(
-    addComplexNumbers({ real: 5, coefficient: 3 }, { real: 4, coefficient: 2 })
-  );
-  console.log(
-    addComplexNumbers({ real: 3, coefficient: 1 }, { real: -1, coefficient: 2 })
-  );
-  console.log(squareComplexNumber({ real: 1, coefficient: 1 }));
+  const iterations = calculateIterations();
+  draw(ctx, iterations);
 });

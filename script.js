@@ -15,25 +15,70 @@ var squareComplexNumber = function (x) {
     return square;
 };
 var fc = function (z, c) {
-    return Math.pow(z, 2) + c;
+    return addComplexNumbers(squareComplexNumber(z), c);
 };
-var iterate = function () { };
-var draw = function (ctx) {
-    for (var i = 0; i < totalWidth; i++) {
-        for (var j = 0; j < totalHeight; j++) {
-            ctx.fillRect(i, j, 1, 1);
+var getColor = function (iterations) {
+    if (iterations > 900) {
+        return "black";
+    }
+    if (iterations > 600) {
+        return "blue";
+    }
+    if (iterations > 300) {
+        return "purple";
+    }
+    if (iterations > 100) {
+        return "yellow";
+    }
+    return "red";
+};
+var calculateIterations = function () {
+    var iterations = new Array(1000);
+    for (var i = 0; i < iterations.length; i++) {
+        iterations[i] = new Array(1000);
+    }
+    for (var i = 0; i < 1000; i++) {
+        for (var j = 0; j < 1000; j++) {
+            var currentIterations = 0;
+            var z = {
+                real: 0,
+                coefficient: 0,
+            };
+            var next = fc(z, {
+                real: i / 1000,
+                coefficient: j / 1000,
+            });
+            while (currentIterations < 1000) {
+                if (Math.pow(next.real * next.coefficient, 2) > 50) {
+                    break;
+                }
+                next = fc(next, {
+                    real: i / 1000,
+                    coefficient: j / 1000,
+                });
+                currentIterations++;
+            }
+            iterations[i][j] = currentIterations;
+        }
+    }
+    return iterations;
+};
+var drawPixel = function (ctx, x, y, iterations) {
+    ctx.fillStyle = getColor(iterations);
+    ctx.fillRect(x, y, 1, 1);
+};
+var draw = function (ctx, iterations) {
+    for (var i = 0; i < 1000; i++) {
+        for (var j = 0; j < 1000; j++) {
+            drawPixel(ctx, i, j, iterations[i][j]);
         }
     }
 };
 document.addEventListener("DOMContentLoaded", function () {
     var app = document.getElementById("app");
-    app.height = totalHeight;
-    app.width = totalWidth;
+    app.height = 1000;
+    app.width = 1000;
     var ctx = app.getContext("2d");
-    draw(ctx);
-    ctx.fillStyle = "red";
-    ctx.fillRect(0, 0, 100, 20);
-    console.log(addComplexNumbers({ real: 5, coefficient: 3 }, { real: 4, coefficient: 2 }));
-    console.log(addComplexNumbers({ real: 3, coefficient: 1 }, { real: -1, coefficient: 2 }));
-    console.log(squareComplexNumber({ real: 1, coefficient: 1 }));
+    var iterations = calculateIterations();
+    draw(ctx, iterations);
 });
