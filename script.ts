@@ -100,56 +100,78 @@ const getMultiplier = (quadrant: Quadrant) => {
   }
 };
 
-const calculateIterations = (quadrant: Quadrant) => {
-  const iterations = new Array(2000);
-  for (let i = 0; i < iterations.length; i++) {
-    iterations[i] = new Array(2000);
-  }
+const draw = (ctx: CanvasRenderingContext2D) => {
+  const [x1, y1] = getMultiplier(1);
+  const [x4, y4] = getMultiplier(4);
 
-  const [x, y] = getMultiplier(quadrant);
+  const z: ComplexNumber = {
+    real: 0,
+    coefficient: 0,
+  };
 
   for (let i = 0; i < 2000; i++) {
     for (let j = 0; j < 2000; j++) {
       let currentIterations = 0;
-      const z: ComplexNumber = {
-        real: 0,
-        coefficient: 0,
-      };
+
       let next = fc(z, {
-        real: (x * i) / 1000,
-        coefficient: (y * j) / 1000,
+        real: (x1 * i) / 1000,
+        coefficient: (y1 * j) / 1000,
       });
+
       while (currentIterations < 1000) {
         if (Math.pow(next.real * next.coefficient, 2) > 50) {
           break;
         }
 
         next = fc(next, {
-          real: (x * i) / 1000,
-          coefficient: (y * j) / 1000,
+          real: (x1 * i) / 1000,
+          coefficient: (y1 * j) / 1000,
         });
 
         currentIterations++;
       }
-      iterations[i][j] = currentIterations;
+
+      drawPixel(ctx, currentIterations, 1, i, j);
+      currentIterations = 0;
+      next = fc(z, {
+        real: (x4 * i) / 1000,
+        coefficient: (y4 * j) / 1000,
+      });
+
+      while (currentIterations < 1000) {
+        if (Math.pow(next.real * next.coefficient, 2) > 50) {
+          break;
+        }
+
+        next = fc(next, {
+          real: (x4 * i) / 1000,
+          coefficient: (y4 * j) / 1000,
+        });
+
+        currentIterations++;
+      }
+      drawPixel(ctx, currentIterations, 4, i, j);
     }
   }
-
-  return iterations;
 };
 
-const draw = (
+const drawPixel = (
   ctx: CanvasRenderingContext2D,
-  iterations: number[][],
-  quadrant: Quadrant
+  iterations: number,
+  quadrant: Quadrant,
+  x: number,
+  y: number
 ) => {
   const [offsetX, offsetY] = getMultiplier(quadrant);
-  for (let i = 0; i < 2000; i++) {
-    for (let j = 0; j < 2000; j++) {
-      ctx.fillStyle = getColor(iterations[i][j]);
-      ctx.fillRect(i * offsetX, offsetY * j, 1, 1);
-    }
+  let [otherOffsetX, otherOffsetY] = [0, 0];
+  if (quadrant === 1) {
+    [otherOffsetX, otherOffsetY] = getMultiplier(2);
+  } else {
+    [otherOffsetX, otherOffsetY] = getMultiplier(3);
   }
+  ctx.fillStyle = getColor(iterations);
+  ctx.fillRect(x * offsetX, offsetY * y, 1, 1);
+  ctx.fillRect(x * otherOffsetX, otherOffsetY * y, 1, 1);
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -160,15 +182,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const ctx = app.getContext("2d");
 
+  if (!ctx) return;
+
   ctx.translate(3000, 1500);
 
-  const iterationsQuardantI = calculateIterations(1);
-  const iterationsQuardantII = calculateIterations(2);
-  const iterationsQuardantIII = calculateIterations(3);
-  const iterationsQuardantIV = calculateIterations(4);
-
-  draw(ctx, iterationsQuardantI, 1);
-  draw(ctx, iterationsQuardantII, 2);
-  draw(ctx, iterationsQuardantIII, 3);
-  draw(ctx, iterationsQuardantIV, 4);
+  draw(ctx);
 });
