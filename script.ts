@@ -39,9 +39,6 @@ const getColor = (iterations: number) => {
     return "yellow";
   }
   if (iterations > 3) {
-    return "pink";
-  }
-  if (iterations > 2) {
     return "red";
   }
   return "#caf0f8";
@@ -69,8 +66,8 @@ const draw = (ctx: CanvasRenderingContext2D) => {
     coefficient: 0,
   };
 
-  for (let i = 0; i < 3000; i++) {
-    for (let j = 0; j < 2000; j++) {
+  for (let i = 0; i < 2400; i++) {
+    for (let j = 0; j < 1500; j++) {
       let currentIterations = 0;
 
       let next = fc(z, {
@@ -78,22 +75,25 @@ const draw = (ctx: CanvasRenderingContext2D) => {
         coefficient: (y1 * j) / 1000,
       });
 
-      while (currentIterations < 1000) {
-        if (Math.pow(next.real * next.coefficient, 2) > 50) {
-          break;
+      if (i < 800) {
+        while (currentIterations < 1000) {
+          if (Math.pow(next.real * next.coefficient, 2) > 50) {
+            break;
+          }
+
+          next = fc(next, {
+            real: (x1 * i) / 1000,
+            coefficient: (y1 * j) / 1000,
+          });
+
+          currentIterations++;
         }
 
-        next = fc(next, {
-          real: (x1 * i) / 1000,
-          coefficient: (y1 * j) / 1000,
-        });
-
-        currentIterations++;
+        if (currentIterations < 200) {
+          drawPixel(ctx, currentIterations, 1, i, j);
+        }
       }
 
-      if (currentIterations < 200) {
-        drawPixel(ctx, currentIterations, 1, i, j);
-      }
       currentIterations = 0;
       next = fc(z, {
         real: (x4 * i) / 1000,
@@ -141,8 +141,8 @@ const drawPixel = (
 document.addEventListener("DOMContentLoaded", () => {
   const app = document.getElementById("app") as HTMLCanvasElement;
 
-  app.height = 3000;
-  app.width = 5000;
+  app.height = 2400;
+  app.width = 3000;
 
   const ctx = app.getContext("2d");
 
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ctx.fillStyle = "#101010";
   ctx.fillRect(0, 0, app.width, app.height);
 
-  ctx.translate(3000, 1500);
+  ctx.translate(2200, 1200);
 
   draw(ctx);
 });
