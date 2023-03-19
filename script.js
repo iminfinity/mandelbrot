@@ -50,30 +50,30 @@ var getColor = function (iterations) {
         return "#F8F9FA";
     }
     if (iterations > 100) {
-        return "#CAF0F8";
+        return "#03045E";
     }
     if (iterations > 70) {
-        return "#ADE8F4";
+        return "#023E8A";
     }
     if (iterations > 60) {
-        return "#90E0EF";
+        return "#0077B6";
     }
     if (iterations > 50) {
-        return "#48CAE4";
+        return "#0096C7";
     }
     if (iterations > 80) {
         return "#00B4D8";
     }
     if (iterations > 60) {
-        return "#0096C7";
+        return "#48CAE4";
     }
     if (iterations > 30) {
-        return "#0077B6";
+        return "#90E0EF";
     }
     if (iterations > 10) {
-        return "#023E8A";
+        return "#ADE8F4";
     }
-    return "#03045E";
+    return "#CAF0F8";
 };
 var getMultiplier = function (quadrant) {
     switch (quadrant) {
@@ -130,10 +130,10 @@ var draw = function (ctx, iterations, quadrant) {
 };
 document.addEventListener("DOMContentLoaded", function () {
     var app = document.getElementById("app");
-    app.height = 2000;
+    app.height = 3000;
     app.width = 4000;
     var ctx = app.getContext("2d");
-    ctx.translate(3500, 1000);
+    ctx.translate(3000, 1500);
     var iterationsQuardantI = calculateIterations(1);
     var iterationsQuardantII = calculateIterations(2);
     var iterationsQuardantIII = calculateIterations(3);
