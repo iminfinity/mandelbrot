@@ -5,13 +5,16 @@ type ComplexNumber = {
 
 type Quadrant = 1 | 2 | 3 | 4;
 
-type PixelInfo = {
-  fillStyle: string;
-  x: number;
-  y: number;
-};
+type Color = "purple" | "blue" | "green" | "yellow" | "red" | "#caf0f8";
 
-const pixelInfo: PixelInfo[] = [];
+const pixelInfo: { [key in Color]: { x: number; y: number }[] } = {
+  purple: [],
+  blue: [],
+  green: [],
+  yellow: [],
+  red: [],
+  "#caf0f8": [],
+};
 
 const addComplexNumbers = (x: ComplexNumber, y: ComplexNumber) => {
   const sum: ComplexNumber = {
@@ -141,24 +144,21 @@ const savePixelInfo = (
     [otherOffsetX, otherOffsetY] = getMultiplier(3);
   }
 
-  const fillStyle = getColor(iterations);
-
-  pixelInfo.push({
-    fillStyle: fillStyle,
-    x: x * offsetX,
-    y: y * offsetY,
-  });
-  pixelInfo.push({
-    fillStyle: fillStyle,
-    x: x * otherOffsetX,
-    y: y * otherOffsetY,
-  });
+  pixelInfo[getColor(iterations)].push(
+    { x: x * offsetX, y: y * offsetY },
+    {
+      x: x * otherOffsetX,
+      y: y * otherOffsetY,
+    }
+  );
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
-  for (let i = 0; i < pixelInfo.length; i++) {
-    ctx.fillStyle = pixelInfo[i].fillStyle;
-    ctx.fillRect(pixelInfo[i].x, pixelInfo[i].y, 1, 1);
+  for (const [color, info] of Object.entries(pixelInfo)) {
+    ctx.fillStyle = color;
+    for (let i = 0; i < info.length; i++) {
+      ctx.fillRect(info[i].x, info[i].y, 1, 1);
+    }
   }
 };
 

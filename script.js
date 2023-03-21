@@ -1,5 +1,12 @@
 "use strict";
-const pixelInfo = [];
+const pixelInfo = {
+    purple: [],
+    blue: [],
+    green: [],
+    yellow: [],
+    red: [],
+    "#caf0f8": [],
+};
 const addComplexNumbers = (x, y) => {
     const sum = {
         real: x.real + y.real,
@@ -106,22 +113,17 @@ const savePixelInfo = (iterations, quadrant, x, y) => {
     else {
         [otherOffsetX, otherOffsetY] = getMultiplier(3);
     }
-    const fillStyle = getColor(iterations);
-    pixelInfo.push({
-        fillStyle: fillStyle,
-        x: x * offsetX,
-        y: y * offsetY,
-    });
-    pixelInfo.push({
-        fillStyle: fillStyle,
+    pixelInfo[getColor(iterations)].push({ x: x * offsetX, y: y * offsetY }, {
         x: x * otherOffsetX,
         y: y * otherOffsetY,
     });
 };
 const draw = (ctx) => {
-    for (let i = 0; i < pixelInfo.length; i++) {
-        ctx.fillStyle = pixelInfo[i].fillStyle;
-        ctx.fillRect(pixelInfo[i].x, pixelInfo[i].y, 1, 1);
+    for (const [color, info] of Object.entries(pixelInfo)) {
+        ctx.fillStyle = color;
+        for (let i = 0; i < info.length; i++) {
+            ctx.fillRect(info[i].x, info[i].y, 1, 1);
+        }
     }
 };
 document.addEventListener("DOMContentLoaded", () => {
