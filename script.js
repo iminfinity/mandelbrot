@@ -1,4 +1,5 @@
 "use strict";
+const pixelInfo = [];
 const addComplexNumbers = (x, y) => {
     const sum = {
         real: x.real + y.real,
@@ -46,7 +47,7 @@ const getMultiplier = (quadrant) => {
             return [-1, -1];
     }
 };
-const draw = (ctx) => {
+const calculateIterations = () => {
     const [x1, y1] = getMultiplier(1);
     const [x4, y4] = getMultiplier(4);
     const z = {
@@ -72,7 +73,7 @@ const draw = (ctx) => {
                     currentIterations++;
                 }
                 if (currentIterations < 200) {
-                    drawPixel(ctx, currentIterations, 1, i, j);
+                    savePixelInfo(currentIterations, 1, i, j);
                 }
             }
             currentIterations = 0;
@@ -91,12 +92,12 @@ const draw = (ctx) => {
                 currentIterations++;
             }
             if (currentIterations < 200) {
-                drawPixel(ctx, currentIterations, 4, i, j);
+                savePixelInfo(currentIterations, 4, i, j);
             }
         }
     }
 };
-const drawPixel = (ctx, iterations, quadrant, x, y) => {
+const savePixelInfo = (iterations, quadrant, x, y) => {
     const [offsetX, offsetY] = getMultiplier(quadrant);
     let [otherOffsetX, otherOffsetY] = [0, 0];
     if (quadrant === 1) {
@@ -105,19 +106,38 @@ const drawPixel = (ctx, iterations, quadrant, x, y) => {
     else {
         [otherOffsetX, otherOffsetY] = getMultiplier(3);
     }
-    ctx.fillStyle = getColor(iterations);
-    ctx.fillRect(x * offsetX, offsetY * y, 1, 1);
-    ctx.fillRect(x * otherOffsetX, otherOffsetY * y, 1, 1);
+    const fillStyle = getColor(iterations);
+    pixelInfo.push({
+        fillStyle: fillStyle,
+        x: x * offsetX,
+        y: y * offsetY,
+    });
+    pixelInfo.push({
+        fillStyle: fillStyle,
+        x: x * otherOffsetX,
+        y: y * otherOffsetY,
+    });
+};
+const draw = (ctx) => {
+    for (let i = 0; i < pixelInfo.length; i++) {
+        ctx.fillStyle = pixelInfo[i].fillStyle;
+        ctx.fillRect(pixelInfo[i].x, pixelInfo[i].y, 1, 1);
+    }
 };
 document.addEventListener("DOMContentLoaded", () => {
+    const loading = document.getElementById("loading");
+    if (!loading)
+        return;
     const app = document.getElementById("app");
-    app.height = 2400;
-    app.width = 3000;
     const ctx = app.getContext("2d");
     if (!ctx)
         return;
+    app.height = 2400;
+    app.width = 3000;
     ctx.fillStyle = "#101010";
     ctx.fillRect(0, 0, app.width, app.height);
     ctx.translate(2200, 1200);
+    calculateIterations();
+    loading.remove();
     draw(ctx);
 });

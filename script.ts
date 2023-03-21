@@ -5,6 +5,14 @@ type ComplexNumber = {
 
 type Quadrant = 1 | 2 | 3 | 4;
 
+type PixelInfo = {
+  fillStyle: string;
+  x: number;
+  y: number;
+};
+
+const pixelInfo: PixelInfo[] = [];
+
 const addComplexNumbers = (x: ComplexNumber, y: ComplexNumber) => {
   const sum: ComplexNumber = {
     real: x.real + y.real,
@@ -57,7 +65,7 @@ const getMultiplier = (quadrant: Quadrant) => {
   }
 };
 
-const draw = (ctx: CanvasRenderingContext2D) => {
+const calculateIterations = () => {
   const [x1, y1] = getMultiplier(1);
   const [x4, y4] = getMultiplier(4);
 
@@ -90,7 +98,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
         }
 
         if (currentIterations < 200) {
-          drawPixel(ctx, currentIterations, 1, i, j);
+          savePixelInfo(currentIterations, 1, i, j);
         }
       }
 
@@ -113,14 +121,13 @@ const draw = (ctx: CanvasRenderingContext2D) => {
         currentIterations++;
       }
       if (currentIterations < 200) {
-        drawPixel(ctx, currentIterations, 4, i, j);
+        savePixelInfo(currentIterations, 4, i, j);
       }
     }
   }
 };
 
-const drawPixel = (
-  ctx: CanvasRenderingContext2D,
+const savePixelInfo = (
   iterations: number,
   quadrant: Quadrant,
   x: number,
@@ -133,25 +140,47 @@ const drawPixel = (
   } else {
     [otherOffsetX, otherOffsetY] = getMultiplier(3);
   }
-  ctx.fillStyle = getColor(iterations);
-  ctx.fillRect(x * offsetX, offsetY * y, 1, 1);
-  ctx.fillRect(x * otherOffsetX, otherOffsetY * y, 1, 1);
+
+  const fillStyle = getColor(iterations);
+
+  pixelInfo.push({
+    fillStyle: fillStyle,
+    x: x * offsetX,
+    y: y * offsetY,
+  });
+  pixelInfo.push({
+    fillStyle: fillStyle,
+    x: x * otherOffsetX,
+    y: y * otherOffsetY,
+  });
+};
+
+const draw = (ctx: CanvasRenderingContext2D) => {
+  for (let i = 0; i < pixelInfo.length; i++) {
+    ctx.fillStyle = pixelInfo[i].fillStyle;
+    ctx.fillRect(pixelInfo[i].x, pixelInfo[i].y, 1, 1);
+  }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  const loading = document.getElementById("loading");
+  if (!loading) return;
+
   const app = document.getElementById("app") as HTMLCanvasElement;
+  const ctx = app.getContext("2d");
+  if (!ctx) return;
 
   app.height = 2400;
   app.width = 3000;
-
-  const ctx = app.getContext("2d");
-
-  if (!ctx) return;
 
   ctx.fillStyle = "#101010";
   ctx.fillRect(0, 0, app.width, app.height);
 
   ctx.translate(2200, 1200);
+
+  calculateIterations();
+
+  loading.remove();
 
   draw(ctx);
 });
